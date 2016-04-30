@@ -1,0 +1,7 @@
+config.py
+hoods/config.py
+__pychache__
+env
+hoods/__pycache__/
+tests/__pycache__/
+hoods_api.log
