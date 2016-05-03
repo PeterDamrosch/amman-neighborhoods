@@ -63,3 +63,28 @@ class TestAPI(unittest.TestCase):
         
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.mimetype, "application/json")
+    
+    def test_get_all_success(self):
+        response = self.client.get("/api/geometry",
+            headers=[("Accept", "application/json")]
+        )
+        print(response.status_code)
+        print("Test response message")
+        
+        data = json.loads(response.data.decode("ascii"))
+        print(data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["type"], "FeatureCollection")
+    
+    def test_get_5_success(self):
+        response = self.client.get("/api/geometry",
+            headers=[("Accept", "application/json")]
+        )
+        print(response.status_code)
+        print("Test response message")
+        
+        data = json.loads(response.data.decode("ascii"))
+        print(data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["type"], "FeatureCollection")
+        

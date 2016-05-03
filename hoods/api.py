@@ -63,5 +63,23 @@ def point_post():
         data_response =  {"result": "Feature successfully added to CartoDB"}
         return Response(json.dumps(data_response), 201, mimetype="application/json")
 
+@app.route("/api/geometry", methods=["GET"])
+def point_get():
+    """ Get points in GeoJSON from CartoDB """
+
+    sqlQueryAll = "SELECT * FROM "+table_points
+    
+    # Send insert query to CartoDB
+    r = requests.get("https://peterdamrosch.cartodb.com/api/v2/sql?format=GeoJSON&q="+sqlQueryAll)
+    
+    # Check that GET was successful, send relay data to client
+    print(r.status_code)
+    print(r.json())
+    
+    if r.status_code == 200:
+        return Response(json.dumps(r.json()), 200, mimetype="application/json")
+    else:
+        return Response(json.dumps(r.json()), 400,mimetype="application/json")
+    
 
     
