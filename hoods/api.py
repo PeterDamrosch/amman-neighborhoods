@@ -42,6 +42,12 @@ def point_post():
         return Response(json.dumps(data_response), 200, mimetype="application/json")
         
     elif "description" in data:
+        try:
+            validate(data,point_schema)
+        except ValidationError as error:
+            data = {"message": error.message}
+            return Response(json.dumps(data), 422, mimetype="application/json")
+        
         # Get data from request
         coordinates = data["coordinates"]
         enteredDescription = data["description"]
@@ -87,8 +93,4 @@ def point_get():
         return Response(json.dumps(r.json()), 200, mimetype="application/json")
     else:
         return Response(json.dumps(r.json()), 400,mimetype="application/json")
-    
-  
-    
-
     
