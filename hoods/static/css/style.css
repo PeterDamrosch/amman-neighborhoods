@@ -20,20 +20,12 @@ h1 {
   font-weight: lighter;
 }
 
-#wrapper {
-  width: 750px;
-}
-
+/* - - - - MAP - - - -*/
 #map {
-  width: 750px;
-  margin: 0 auto;
-  height: 375px;
-}
-
-#controls {
-  width: 100%;
-  margin: 0 auto;
-  float: left;
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:100%;
 }
 
 #form {
@@ -55,4 +47,41 @@ h1 {
   font-size: 12px;
   text-align: right;
   line-height: 16px;
+}
+
+/* - - - - Legend - - - -*/
+.legend {
+    color: #333333;
+    font-family: 'Open Sans', Helvetica, sans-serif;
+    font-size: 14px;
+    padding: 6px 8px;
+    line-height: 22px;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    width: 250px;
+}
+
+.title{
+    line-height: 18px;
+    text-align: center;
+    margin: 2px 0px;
+    padding: 0px 5px
+}
+
+.subtitle {
+    margin-top: 4px
+}
+
+.legend p {
+    font-size: 14px;
+    line-height: 24px;
+    margin: 0;
+}
+
+#name {
+    margin: 10px 0;
+    font-size: 18px;
+    font-weight: bold
 }

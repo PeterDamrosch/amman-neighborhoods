@@ -6,19 +6,87 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.2.3/leaflet.draw.css" />
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="static/css/style.css">
+    <style>
+      body {
+        margin: 0px;
+        font-family: 'Open Sans', Helvetica, sans-serif;
+      }
+      img {
+        float: left;
+        padding-right: 10px;
+      }
+      p {
+        font-size: 15px;
+        line-height: 25px;
+      }
+      h1 {
+        line-height: 60px;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        font-weight: lighter;
+      }
+      /* - - - - MAP - - - -*/
+      
+      html, body, #map {
+            height: 100%;
+            width: 100%;
+      }
+      
+      #form {
+        margin-top: 5px;
+        font-size: 12px;
+        text-align: left;
+        line-height: 16px;
+        width:375px;
+        float: left;
+      }
+      #header {
+        margin-top: 0px;
+        margin-bottom: 0px;
+      }
+      #credits p {
+        margin-top: 5px;
+        font-size: 12px;
+        text-align: right;
+        line-height: 16px;
+      }
+      /* - - - - Legend - - - -*/
+      .legend {
+          color: #333333;
+          font-family: 'Open Sans', Helvetica, sans-serif;
+          font-size: 14px;
+          padding: 6px 8px;
+          line-height: 22px;
+          background: white;
+          background: rgba(255,255,255,0.8);
+          box-shadow: 0 0 15px rgba(0,0,0,0.2);
+          border-radius: 5px;
+          width: 250px;
+      }
+      .title{
+          line-height: 18px;
+          text-align: center;
+          margin: 2px 0px;
+          padding: 0px 5px
+      }
+      .subtitle {
+          margin-top: 4px
+      }
+      .legend p {
+          font-size: 14px;
+          line-height: 24px;
+          margin: 0;
+      }
+      #name {
+          margin: 10px 0;
+          font-size: 18px;
+          font-weight: bold
+      }
+    </style>
   </head>
   <body>
-    <div id="wrapper">
-      <div id="header">
-        <h1>Amman Neighborhoods - Test Version</h1>
-      </div>
-      <div id="map"></div>
-      <div id="controls">
-        <p>Add a neighborhood, or a click on one to see more info</br></p>
-        <input type="button" onclick="startEdits()" value="Place a Point">
-        <input type="button" onclick="stopEdits()" value="Stop Your Editing Session"><br>
-      </div>
-    </div>
+    
+    <div id="map"></div>
 
     <div id="dialog" title="Point Information">     
       <form>
@@ -52,12 +120,14 @@
     // Declare Variables
     // Create Global Variable to hold CartoDB points
     var cartoDBPoints = null;
+    var cartoDBPolygons= null;
 
     // Set your CartoDB Username
     var cartoDBUsername = "peterdamrosch";
 
     // Write SQL Selection Query to be Used on CartoDB Table
     var sqlQuery = "SELECT * FROM neighborhoodpoints";
+    var sqlQueryPolygon = "SELECT * FROM neighborhoodpolygons"
 
     // Create variable for Leaflet.draw features
     var drawnItems = new L.FeatureGroup();
@@ -74,10 +144,22 @@
         }).addTo(map);
       });
     };
+    
+    // Get CartoDB selection as GeoJSON and Add to Map
+    function getGeoJSONPolygon(){
+      $.getJSON("https://"+cartoDBUsername+".cartodb.com/api/v2/sql?format=GeoJSON&q="+sqlQueryPolygon, function(data) {
+        cartoDBPolygons = L.geoJson(data, {
+          onEachFeature: function(feature, layer) {
+            layer.bindPopup('<p>' + feature.properties.name + '<br /> <em>Description: </em>' + feature.properties.description + '</p>')
+          }
+        }).addTo(map);
+      });
+    };
 
     // Run showAll function automatically when document loads
     $( document ).ready(function() {
       getGeoJSON();
+      getGeoJSONPolygon()
     });
 
     var drawControl = new L.Control.Draw({
@@ -228,8 +310,30 @@
       if (map.hasLayer(cartoDBPoints)) {
         map.removeLayer(cartoDBPoints);
       };
+      if (map.hasLayer(cartoDBPolygons)) {
+        map.removeLayer(cartoDBPolygons);
+      };
       getGeoJSON();
+      getGeoJSONPolygon()
     };
+    
+    // Create Neighborhood Legend
+    var legendNeighborhood = L.control({position: 'topright'});
+    
+    // Function that runs when Neighborhood Legend is added to map
+    legendNeighborhood.onAdd = function (map) {
+    
+        // Create Div Element and Populate it with HTML
+        var div = L.DomUtil.create('div', 'legend');
+        div.innerHTML += '<div class="title"><b>Amman Neighborhoods Test Version</b></div>';
+        div.innerHTML += '<input type="button" onclick="startEdits()" value="Add a Neighborhood!">';
+   
+        // Return the Legend div containing the HTML content
+        return div;
+    };
+    
+    // Add Neighborhood Legend to Map
+    legendNeighborhood.addTo(map);
     </script>
   </body>
 </html>
