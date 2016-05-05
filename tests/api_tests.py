@@ -77,14 +77,13 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(data["type"], "FeatureCollection")
     
     def test_get_5_success(self):
-        response = self.client.get("/api/geometry",
+  
+        response = self.client.get("/api/geometry?lat=31.954014&lng=35.910794&limit=5",
             headers=[("Accept", "application/json")]
         )
-        print(response.status_code)
-        print("Test response message")
+        print("Test Get 5")
         
         data = json.loads(response.data.decode("ascii"))
-        print(data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["type"], "FeatureCollection")
+        self.assertEqual(len(data["features"]), 5)
         

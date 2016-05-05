@@ -15,7 +15,7 @@
       <div id="map"></div>
       <div id="controls">
         <p>Add a neighborhood, or a click on one to see more info</br></p>
-        <input type="button" onclick="startEdits()" value="Click to Start Editing">
+        <input type="button" onclick="startEdits()" value="Place a Point">
         <input type="button" onclick="stopEdits()" value="Stop Your Editing Session"><br>
       </div>
     </div>
@@ -82,7 +82,19 @@
 
     var drawControl = new L.Control.Draw({
       draw : {
-        polygon : false,
+        polygon : {
+					shapeOptions: {
+						color: 'blue'
+					},
+					allowIntersection: false,
+					drawError: {
+						color: 'orange',
+						timeout: 1000
+					},
+					showArea: true,
+					metric: false,
+					repeatMode: true
+				},
         polyline : false,
         rectangle : false,
         circle : false
@@ -90,6 +102,7 @@
       edit : false,
       remove: false
     });
+    
 
     var controlOnMap = false;
 
@@ -115,6 +128,20 @@
 
         dialog.dialog( "open" );
     });
+    
+    var submitPolygonToProxy = function(data) {
+      console.log(data)
+      $.ajax({
+        url:"/api/geometry", 
+        type: "POST",
+        data:JSON.stringify(data),
+        contentType:"application/json",
+        success: function(result) {
+          console.log(result);
+          refreshLayer();
+        }
+      });
+    }
 
     var submitToProxy = function(data){
       console.log(data)
@@ -145,11 +172,14 @@
         Cancel: function() {
           dialog.dialog("close");
           map.removeLayer(drawnItems);
+          stopEdits();
         }
       },
       close: function() {
         form[ 0 ].reset();
         console.log("Dialog closed");
+        map.removeLayer(drawnItems);
+        stopEdits();
       }
     });
 
@@ -162,19 +192,30 @@
       var enteredName = placename.value;
       var enteredDescription = description.value;
       drawnItems.eachLayer(function (layer) {
-        var a = layer.getLatLng();
-        console.log(a);
-        coords = {
-          lat: a.lat.toString(),
-          lng: a.lng.toString(),
-        }
-        console.log(coords)
-        data = {
-          coordinates: coords,
-          name: enteredName,
-          description: enteredDescription
+        if (layer instanceof L.Polygon) {
+          // get polygon geom
+          var geojson = layer.toGeoJSON()
+          geojson.properties.name = enteredName
+          geojson.properties.description = enteredDescription
+          console.log(geojson)
+          
+          // submit data with polygon geom to proxy2
+        submitPolygonToProxy(geojson)
+        } else {
+          var a = layer.getLatLng();
+          console.log(a);
+          coords = {
+            lat: a.lat.toString(),
+            lng: a.lng.toString(),
           }
-        submitToProxy(data)
+          console.log(coords)
+           var data = {
+            coordinates: coords,
+            name: enteredName,
+            description: enteredDescription
+            }
+          submitToProxy(data)
+        }
         console.log("Feature has been submitted to the Proxy");
       });
       map.removeLayer(drawnItems);
