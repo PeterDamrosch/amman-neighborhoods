@@ -61,27 +61,70 @@
           background: rgba(255,255,255,0.8);
           box-shadow: 0 0 15px rgba(0,0,0,0.2);
           border-radius: 5px;
-          width: 250px;
+          width: 200px;
       }
       .title{
           line-height: 18px;
+          font-size: 16px;
           text-align: center;
           margin: 2px 0px;
           padding: 0px 5px
       }
       .subtitle {
-          margin-top: 4px
+          margin-top: 4px;
+          text-align: center;
       }
       .legend p {
           font-size: 14px;
           line-height: 24px;
           margin: 0;
       }
-      #name {
-          margin: 10px 0;
-          font-size: 18px;
-          font-weight: bold
+      .legendButton {
+      	-moz-box-shadow:inset 0px 1px 3px 0px #91b8b3;
+      	-webkit-box-shadow:inset 0px 1px 3px 0px #91b8b3;
+      	box-shadow:inset 0px 1px 3px 0px #91b8b3;
+      	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #768d87), color-stop(1, #6c7c7c));
+      	background:-moz-linear-gradient(top, #768d87 5%, #6c7c7c 100%);
+      	background:-webkit-linear-gradient(top, #768d87 5%, #6c7c7c 100%);
+      	background:-o-linear-gradient(top, #768d87 5%, #6c7c7c 100%);
+      	background:-ms-linear-gradient(top, #768d87 5%, #6c7c7c 100%);
+      	background:linear-gradient(to bottom, #768d87 5%, #6c7c7c 100%);
+      	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#768d87', endColorstr='#6c7c7c',GradientType=0);
+      	background-color:#768d87;
+      	-moz-border-radius:5px;
+      	-webkit-border-radius:5px;
+      	border-radius:5px;
+      	border:1px solid #566963;
+      	display:inline-block;
+      	cursor:pointer;
+      	color:#ffffff;
+      	font-family:Arial;
+      	font-size:13px;
+      	font-weight:bold;
+      	padding:5px 10px;
+      	text-decoration:none;
+      	text-shadow:0px -1px 0px #2b665e;
       }
+      .legendButton:hover {
+      	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #6c7c7c), color-stop(1, #768d87));
+      	background:-moz-linear-gradient(top, #6c7c7c 5%, #768d87 100%);
+      	background:-webkit-linear-gradient(top, #6c7c7c 5%, #768d87 100%);
+      	background:-o-linear-gradient(top, #6c7c7c 5%, #768d87 100%);
+      	background:-ms-linear-gradient(top, #6c7c7c 5%, #768d87 100%);
+      	background:linear-gradient(to bottom, #6c7c7c 5%, #768d87 100%);
+      	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#6c7c7c', endColorstr='#768d87',GradientType=0);
+      	background-color:#6c7c7c;
+      }
+      .legendButton:active {
+      	position:relative;
+      	top:1px;
+      }
+      .buttonHolder {
+        margin: 10px auto;
+        width: 150px;
+      }
+     
+      
     </style>
   </head>
   <body>
@@ -121,6 +164,20 @@
     // Create Global Variable to hold CartoDB points
     var cartoDBPoints = null;
     var cartoDBPolygons= null;
+    
+    // Function to remove Points if on Map
+    var removePoints = function() {
+      if (map.hasLayer(cartoDBPoints)) {
+        map.removeLayer(cartoDBPoints);
+      };
+    }
+    
+    // Function to emove Polygons if on Map
+    var removePolygons = function() {
+      if (map.hasLayer(cartoDBPolygons)) {
+        map.removeLayer(cartoDBPolygons);
+      };
+    }
 
     // Set your CartoDB Username
     var cartoDBUsername = "peterdamrosch";
@@ -156,11 +213,12 @@
       });
     };
 
-    // Run showAll function automatically when document loads
+    /* COMMENTING THIS OUT // Run showAll function automatically when document loads
     $( document ).ready(function() {
       getGeoJSON();
       getGeoJSONPolygon()
     });
+    */
 
     var drawControl = new L.Control.Draw({
       draw : {
@@ -189,6 +247,8 @@
     var controlOnMap = false;
 
     function startEdits(){
+      removePoints();
+      removePolygons();
       if(controlOnMap == true){
         map.removeControl(drawControl);
         controlOnMap = false;
@@ -196,6 +256,9 @@
       map.addControl(drawControl);
       controlOnMap = true;
     };
+    
+    // Call startEdits() by default
+    //startEdits()
 
     function stopEdits(){
       map.removeControl(drawControl);
@@ -307,12 +370,14 @@
     };
 
     function refreshLayer() {
-      if (map.hasLayer(cartoDBPoints)) {
-        map.removeLayer(cartoDBPoints);
-      };
-      if (map.hasLayer(cartoDBPolygons)) {
-        map.removeLayer(cartoDBPolygons);
-      };
+      // Remove control if on map
+      stopEdits()
+      
+      // Remove points and polygons if on map
+      removePoints()
+      removePolygons()
+      
+      // Get data from CartoDB
       getGeoJSON();
       getGeoJSONPolygon()
     };
@@ -325,8 +390,9 @@
     
         // Create Div Element and Populate it with HTML
         var div = L.DomUtil.create('div', 'legend');
-        div.innerHTML += '<div class="title"><b>Amman Neighborhoods Test Version</b></div>';
-        div.innerHTML += '<input type="button" onclick="startEdits()" value="Add a Neighborhood!">';
+        div.innerHTML += '<div class="title"><b>Amman Neighborhoods</b><br/><small>Test Version</div>';
+        div.innerHTML += '<div class="buttonHolder"><input class="legendButton" type="button" onclick="startEdits()" value="Add a Neighborhood"></div>';
+        div.innerHTML += '<div class="buttonHolder"><input class="legendButton" type="button" onclick="refreshLayer()" value="View Neighborhoods"></div>';
    
         // Return the Legend div containing the HTML content
         return div;
