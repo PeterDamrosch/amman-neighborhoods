@@ -61,7 +61,7 @@
           background: rgba(255,255,255,0.8);
           box-shadow: 0 0 15px rgba(0,0,0,0.2);
           border-radius: 5px;
-          width: 200px;
+          width: 220px;
       }
       .title{
           line-height: 18px;
@@ -118,10 +118,14 @@
       .legendButton:active {
       	position:relative;
       	top:1px;
+      	
       }
       .buttonHolder {
         margin: 10px auto;
         width: 150px;
+      }
+      .smallButton {
+        width: 66px;
       }
      
       
@@ -213,13 +217,6 @@
       });
     };
 
-    /* COMMENTING THIS OUT // Run showAll function automatically when document loads
-    $( document ).ready(function() {
-      getGeoJSON();
-      getGeoJSONPolygon()
-    });
-    */
-
     var drawControl = new L.Control.Draw({
       draw : {
         polygon : {
@@ -233,20 +230,20 @@
 					},
 					showArea: true,
 					metric: false,
-					repeatMode: true
 				},
-        polyline : false,
-        rectangle : false,
-        circle : false
+      polyline : false,
+      rectangle : false,
+      circle : false,
       },
-      edit : false,
-      remove: false
+      edit: {
+        featureGroup: drawnItems
+      }
     });
     
 
     var controlOnMap = false;
 
-    function startEdits(){
+    function startEdits(shapeType){
       removePoints();
       removePolygons();
       if(controlOnMap == true){
@@ -255,24 +252,40 @@
       }
       map.addControl(drawControl);
       controlOnMap = true;
+      //console.log(drawControl._toolbars["24"]._modes.polygon.handler.enable())
+      drawControl._toolbars["24"]._modes[shapeType].handler.enable()
     };
+    
+    var startPolygon = function() {
+      startEdits("polygon")
+    }
+    
+    var startPoint = function() {
+      startEdits("marker")
+    }
     
     // Call startEdits() by default
     //startEdits()
 
     function stopEdits(){
-      map.removeControl(drawControl);
-      controlOnMap = false;
+      if (controlOnMap){
+        map.removeControl(drawControl);
+        controlOnMap = false;
+      }
     };
 
     map.on('draw:created', function (e) {
+        $(".hidable").show()
         var layer = e.layer;
-
         map.addLayer(drawnItems);
         drawnItems.addLayer(layer);
 
-        dialog.dialog( "open" );
+        //dialog.dialog( "open" );
     });
+    
+    var submitClick = function() {
+      dialog.dialog( "open" );
+    }
     
     var submitPolygonToProxy = function(data) {
       console.log(data)
@@ -316,15 +329,13 @@
         "Add to Database": setData,
         Cancel: function() {
           dialog.dialog("close");
-          map.removeLayer(drawnItems);
-          stopEdits();
+          cancelClick()
         }
       },
       close: function() {
         form[ 0 ].reset();
         console.log("Dialog closed");
-        map.removeLayer(drawnItems);
-        stopEdits();
+        cancelClick()
       }
     });
 
@@ -391,15 +402,46 @@
         // Create Div Element and Populate it with HTML
         var div = L.DomUtil.create('div', 'legend');
         div.innerHTML += '<div class="title"><b>Amman Neighborhoods</b><br/><small>Test Version</div>';
-        div.innerHTML += '<div class="buttonHolder"><input class="legendButton" type="button" onclick="startEdits()" value="Add a Neighborhood"></div>';
+        div.innerHTML += '<div class="buttonHolder"><input class="legendButton" type="button" onclick="startPolygon()" value="Draw a Shape"></div>';
+        div.innerHTML += '<div class="buttonHolder"><input class="legendButton" type="button" onclick="startPoint()" value="Drop a Point"></div>';
         div.innerHTML += '<div class="buttonHolder"><input class="legendButton" type="button" onclick="refreshLayer()" value="View Neighborhoods"></div>';
    
         // Return the Legend div containing the HTML content
         return div;
     };
     
-    // Add Neighborhood Legend to Map
+    // Add Neighobrhood Legend to Map
     legendNeighborhood.addTo(map);
+    
+    // Instructions legend, similar process to above
+    var instructions = L.control({position: 'topright'});
+    instructions.onAdd = function (map) {
+    
+        // Create Div Element and Populate it with HTML
+        var div = L.DomUtil.create('div', 'legend hidable');
+        div.innerHTML += '<div class="title"><b>Instructions</b><br/></div>';
+        div.innerHTML += "<p>1) Edit the shape of your element</p>";
+        div.innerHTML += "<p>2) Click submit when you're done</p>";
+        div.innerHTML += '<div class="buttonHolder smallButton"><input class="legendButton" type="button" onclick="submitClick()" value="Submit"></div>';
+        div.innerHTML += '<div class="buttonHolder smallButton"><input class="legendButton" type="button" onclick="cancelClick()" value="Cancel"></div>';
+   
+        // Return the Legend div containing the HTML content
+        return div;
+    };
+    
+    // Add Instructions Legend to Map
+    instructions.addTo(map);
+    
+    $(".hidable").hide()
+    
+    // Cancel button
+    var cancelClick = function() {
+        map.removeLayer(drawnItems);
+        drawnItems = new L.FeatureGroup()
+        stopEdits();
+        $(".hidable").hide()
+    }
+  
     </script>
   </body>
 </html>
