@@ -182,6 +182,11 @@
     var Thunderforest_Landscape = L.tileLayer('http://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png', {
     	attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
+    
+    googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+    });
         
     var map = new L.Map("map", {center: [31.950519, 35.935979], zoom: 13})
     .addLayer(OpenStreetMap_Mapnik);
@@ -189,10 +194,10 @@
     var baseLayers = {
     "Mapnik": OpenStreetMap_Mapnik,
     "Black and White": OpenStreetMap_BlackAndWhite,
-    "Light Streets": Hydda_Full,
     "Satellite": Esri_WorldImagery,
     "OSM HOT": OpenStreetMap_HOT,
-    "Thunderforest": Thunderforest_Landscape
+    "Thunderforest": Thunderforest_Landscape,
+    "Google Hybrid": googleHybrid
     };
     
     // Toggle baselayers - Good tutorial that explains this on leafletjs.com
