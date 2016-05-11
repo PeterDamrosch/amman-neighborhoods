@@ -184,13 +184,13 @@
     });
         
     var map = new L.Map("map", {center: [31.950519, 35.935979], zoom: 13})
-    .addLayer(Hydda_Full);
+    .addLayer(OpenStreetMap_Mapnik);
     
     var baseLayers = {
+    "Mapnik": OpenStreetMap_Mapnik,
     "Black and White": OpenStreetMap_BlackAndWhite,
     "Light Streets": Hydda_Full,
     "Satellite": Esri_WorldImagery,
-    "Mapnik": OpenStreetMap_Mapnik,
     "OSM HOT": OpenStreetMap_HOT,
     "Thunderforest": Thunderforest_Landscape
     };
